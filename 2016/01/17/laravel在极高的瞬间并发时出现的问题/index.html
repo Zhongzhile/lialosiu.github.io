@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lialosiu&#39;s Note</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.6/semantic.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="app">
+    <div class="ui top fixed menu blur">
+    </div>
+    <div class="ui top fixed borderless menu">
+        <div class="item site-name-area">
+            <a href="/" class="site-title">Lialosiu&#39;s Note</a>
+            
+            <a href="/" class="site-subtitle">各种记录</a>
+            
+        </div>
+        <div class="right menu">
+            <a class="item clock" v-cloak>{{ nowDatetime }}</a>
+        </div>
+    </div>
+    <div class="body">
+        <div class="left-side">
+            
+<articl class="article article-type-post">
+    <div class="article-meta">
+        <header class="article-header">
+            
+            
+            <h1>
+                Laravel 在极高的瞬间并发时出现的问题
+            </h1>
+            
+            
+        </header>
+        <div class="article-date rotate">
+            <i class="icon calendar"></i>
+            <time datetime="2016-01-17T06:36:00.000Z">2016-01-17
+                <small>14:36</small>
+            </time>
+        </div>
+        
+        <div class="article-category rotate">
+            <i class="icon book"></i>
+            <a class="article-category-link" href="/categories/开发/">开发</a>
+        </div>
+        
+        
+    </div>
+    <div class="article-inner">
+        
+        
+        
+        <div class="article-entry">
+            
+            <p>又踩了了一个坑</p>
+<p>之前曾经出现过 laravel 在极高的瞬间并发的时候，会出现session状态丢失的问题。原因是laravel中，session默认储存在文件系统，在瞬间并发时，可能由于文件系统io的原因，导致session文件读写失败，进而造成session丢失。</p>
+<p>这个问题我当时是直接把session存放在cookie或者数据库中解决了。</p>
+<p>然而今天又出现了新状况，也是瞬间高并发的锅。</p>
+<img src="/2016/01/17/laravel在极高的瞬间并发时出现的问题/20160117221844.jpg" alt="20160117221844.jpg" title="">
+<p>如图，这是在ngjs下的一个并发上传的控件，会同时并发上传选择的文件，且在上传前会并发请求以查询文件是否已上传，以完成续传功能。</p>
+<p>1秒内大概有15个并发连接</p>
+<p>在这几个并发连接中，有部分会发生错误，扔我一脸500</p>
+<img src="/2016/01/17/laravel在极高的瞬间并发时出现的问题/20160117222400.jpg" alt="20160117222400.jpg" title="">
+<p>具体报错是^</p>
+<p>然而，我明显没设错mysql账号密码啦</p>
+<p>而且我.env文件中数据库相关的设置是：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="attr">DB_HOST</span>=localhost</div><div class="line"><span class="attr">DB_DATABASE</span>=amaoto-core</div><div class="line"><span class="attr">DB_USERNAME</span>=root</div><div class="line"><span class="attr">DB_PASSWORD</span>=</div></pre></td></tr></table></figure>
+<p>然而报错是说我用了forge作为用户名连接mysql</p>
+<p>等等，forge好熟悉啊</p>
+<p>这货不就是laravel配置文件中的连mysql的默认用户名咩</p>
+<p>检查config/database.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="string">'mysql'</span> =&gt; [</div><div class="line">        <span class="string">'driver'</span>    =&gt; <span class="string">'mysql'</span>,</div><div class="line">        <span class="string">'host'</span>      =&gt; env(<span class="string">'DB_HOST'</span>, <span class="string">'localhost'</span>),</div><div class="line">        <span class="string">'database'</span>  =&gt; env(<span class="string">'DB_DATABASE'</span>, <span class="string">'forge'</span>),</div><div class="line">        <span class="string">'username'</span>  =&gt; env(<span class="string">'DB_USERNAME'</span>, <span class="string">'forge'</span>),</div><div class="line">        <span class="string">'password'</span>  =&gt; env(<span class="string">'DB_PASSWORD'</span>, <span class="string">''</span>),</div><div class="line">        <span class="string">'charset'</span>   =&gt; <span class="string">'utf8'</span>,</div><div class="line">        <span class="string">'collation'</span> =&gt; <span class="string">'utf8_unicode_ci'</span>,</div><div class="line">        <span class="string">'prefix'</span>    =&gt; <span class="string">''</span>,</div><div class="line">        <span class="string">'strict'</span>    =&gt; <span class="keyword">false</span>,</div><div class="line">    ]，</div></pre></td></tr></table></figure>
+<p>果然</p>
+<p>也就是说，<code>env(&#39;DB_USERNAME&#39;, &#39;forge&#39;)</code> 没能成功读取<code>.env</code>文件</p>
+<p>参考之前session状态丢失的解决方法，那就不读取.env咯</p>
+<p>然而不用<code>.env</code>的话，把数据库账密写在<code>config/database.php</code>也不科学</p>
+<p>于是翻了翻文档</p>
+<p>发现<code>artisan</code>指令：<code>config:cache</code> 可缓存配置文件</p>
+<p>马上执行试试，重新测试一看，完美解决。</p>
+<p>嘛，所以难得的更新了blog做个笔记ww</p>
+
+            
+        </div>
+        <footer class="article-footer">
+            <!--<a data-url="http://lialosiu.com/2016/01/17/laravel在极高的瞬间并发时出现的问题/" data-id="ciyn25i330006ygyz6rc8dpba"-->
+               <!--class="article-share-link">share</a>-->
+            
+        </footer>
+    </div>
+    
+</articl>
+
+
+
+        </div>
+        <div class="right-side-assistance">
+            
+            
+            
+            
+            <a href="http://www.lumpofsugar.co.jp/product/tayutama2_as/"><img src="http://www.lumpofsugar.co.jp/product/tayutama2_as/campaign/images/assistance/[150_600]004.jpg" alt="『タユタマ２-After Stories-』2017年4月28日発売予定！"></a>
+            
+            
+            
+            <a href="http://www.lumpofsugar.co.jp/product/tayutama2_as/"><img src="http://www.lumpofsugar.co.jp/product/tayutama2_as/campaign/images/assistance/[150_600]005.jpg" alt="『タユタマ２-After Stories-』2017年4月28日発売予定！"></a>
+            
+            
+            
+            <a href="http://www.favo.co.jp/"><img src="http://www.favo-soft.jp/soft/product/AstralAirFinale/banner/l_banner_A.jpg" alt="アストラエアの白き永遠 Finale -白き星の夢- 応援中！！"></a>
+            
+            
+            
+            <a href="http://www.favo.co.jp/"><img src="http://www.favo-soft.jp/soft/product/AstralAirFinale/banner/l_banner_B.jpg" alt="アストラエアの白き永遠 Finale -白き星の夢- 応援中！！"></a>
+            
+            
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/momentjs/2.17.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/vue/2.1.10/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.6/semantic.min.js"></script>
+<script src="/js/app.js"></script>
+</html>

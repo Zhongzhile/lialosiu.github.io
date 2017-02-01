@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lialosiu&#39;s Note</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.6/semantic.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div id="app">
+    <div class="ui top fixed menu blur">
+    </div>
+    <div class="ui top fixed borderless menu">
+        <div class="item site-name-area">
+            <a href="/" class="site-title">Lialosiu&#39;s Note</a>
+            
+            <a href="/" class="site-subtitle">各种记录</a>
+            
+        </div>
+        <div class="right menu">
+            <a class="item clock" v-cloak>{{ nowDatetime }}</a>
+        </div>
+    </div>
+    <div class="body">
+        <div class="left-side">
+            
+<articl class="article article-type-post">
+    <div class="article-meta">
+        <header class="article-header">
+            
+            
+            <h1>
+                php-fpm配置的一个坑
+            </h1>
+            
+            
+        </header>
+        <div class="article-date rotate">
+            <i class="icon calendar"></i>
+            <time datetime="2016-07-05T08:38:00.000Z">2016-07-05
+                <small>16:38</small>
+            </time>
+        </div>
+        
+        <div class="article-category rotate">
+            <i class="icon book"></i>
+            <a class="article-category-link" href="/categories/开发/">开发</a>
+        </div>
+        
+        
+    </div>
+    <div class="article-inner">
+        
+        
+        
+        <div class="article-entry">
+            
+            <p>调了一个下午，发现 php-fpm 有个怪坑</p>
+<p>我在 docker 下，基于 <code>php:7.0-fpm</code> 镜像，构建了一个容器</p>
+<p>并且 <code>ADD ./app.pool.conf /usr/local/etc/php-fpm.d/</code> ，放了个 pool 进去</p>
+<p>具体内容为</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line">; Unix user/group of processes</div><div class="line">; Note: The user is mandatory. If the group is not set, the default user's group</div><div class="line">;       will be used.</div><div class="line">user = www-data</div><div class="line">group = www-data</div><div class="line"></div><div class="line">; The address on which to accept FastCGI requests.</div><div class="line">; Valid syntaxes are:</div><div class="line">;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on</div><div class="line">;                            a specific port;</div><div class="line">;   'port'                 - to listen on a TCP socket to all addresses on a</div><div class="line">;                            specific port;</div><div class="line">;   '/path/to/unix/socket' - to listen on a unix socket.</div><div class="line">; Note: This value is mandatory.</div><div class="line">listen = 0.0.0.0:9000</div><div class="line"></div><div class="line">; Choose how the process manager will control the number of child processes.</div><div class="line">; Possible Values:</div><div class="line">;   static  - a fixed number (pm.max_children) of child processes;</div><div class="line">;   dynamic - the number of child processes are set dynamically based on the</div><div class="line">;             following directives. With this process management, there will be</div><div class="line">;             always at least 1 children.</div><div class="line">;             pm.max_children      - the maximum number of children that can</div><div class="line">;                                    be alive at the same time.</div><div class="line">;             pm.start_servers     - the number of children created on startup.</div><div class="line">;             pm.min_spare_servers - the minimum number of children in 'idle'</div><div class="line">;                                    state (waiting to process). If the number</div><div class="line">;                                    of 'idle' processes is less than this</div><div class="line">;                                    number then some children will be created.</div><div class="line">;             pm.max_spare_servers - the maximum number of children in 'idle'</div><div class="line">;                                    state (waiting to process). If the number</div><div class="line">;                                    of 'idle' processes is greater than this</div><div class="line">;                                    number then some children will be killed.</div><div class="line">;  ondemand - no children are created at startup. Children will be forked when</div><div class="line">;             new requests will connect. The following parameter are used:</div><div class="line">;             pm.max_children           - the maximum number of children that</div><div class="line">;                                         can be alive at the same time.</div><div class="line">;             pm.process_idle_timeout   - The number of seconds after which</div><div class="line">;                                         an idle process will be killed.</div><div class="line">; Note: This value is mandatory.</div><div class="line">pm = dynamic</div><div class="line"></div><div class="line">; The number of child processes to be created when pm is set to 'static' and the</div><div class="line">; maximum number of child processes when pm is set to 'dynamic' or 'ondemand'.</div><div class="line">; This value sets the limit on the number of simultaneous requests that will be</div><div class="line">; served. Equivalent to the ApacheMaxClients directive with mpm_prefork.</div><div class="line">; Equivalent to the PHP_FCGI_CHILDREN environment variable in the original PHP</div><div class="line">; CGI. The below defaults are based on a server without much resources. Don't</div><div class="line">; forget to tweak pm.* to fit your needs.</div><div class="line">; Note: Used when pm is set to 'static', 'dynamic' or 'ondemand'</div><div class="line">; Note: This value is mandatory.</div><div class="line">pm.max_children = 20</div><div class="line"></div><div class="line">; The number of child processes created on startup.</div><div class="line">; Note: Used only when pm is set to 'dynamic'</div><div class="line">; Default Value: min_spare_servers + (max_spare_servers - min_spare_servers) / 2</div><div class="line">pm.start_servers = 2</div><div class="line"></div><div class="line">; The desired minimum number of idle server processes.</div><div class="line">; Note: Used only when pm is set to 'dynamic'</div><div class="line">; Note: Mandatory when pm is set to 'dynamic'</div><div class="line">pm.min_spare_servers = 1</div><div class="line"></div><div class="line">; The desired maximum number of idle server processes.</div><div class="line">; Note: Used only when pm is set to 'dynamic'</div><div class="line">; Note: Mandatory when pm is set to 'dynamic'</div><div class="line">pm.max_spare_servers = 3</div><div class="line"></div><div class="line">;---------------------</div><div class="line"></div><div class="line">; Make specific Docker environment variables available to PHP</div><div class="line">env[DB_1_ENV_MYSQL_DATABASE] = $DB_1_ENV_MYSQL_DATABASE</div><div class="line">env[DB_1_ENV_MYSQL_USER] = $DB_1_ENV_MYSQL_USER</div><div class="line">env[DB_1_ENV_MYSQL_PASSWORD] = $DB_1_ENV_MYSQL_PASSWORD</div><div class="line"></div><div class="line">catch_workers_output = yes</div></pre></td></tr></table></figure>
+<p>然而…</p>
+<p>php-fpm 一启动就报错</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">root@8ddf4ad1d3b6:/usr/local/etc/php-fpm.d# php-fpm</div><div class="line"><span class="string">[05-Jul-2016 08:36:34]</span> ERROR: <span class="string">[/usr/local/etc/php-fpm.d/applll.pool.conf:4]</span> unknown entry 'user'</div><div class="line"><span class="string">[05-Jul-2016 08:36:34]</span> ERROR: Unable to include /usr/local/etc/php-fpm.d/applll.pool.conf from /usr/local/etc/php-fpm.conf at line <span class="number">4</span></div><div class="line"><span class="string">[05-Jul-2016 08:36:34]</span> ERROR: failed to load configuration file '/usr/local/etc/php-fpm.conf'</div><div class="line"><span class="string">[05-Jul-2016 08:36:34]</span> ERROR: FPM initialization failed</div></pre></td></tr></table></figure>
+<p>研究了好几个钟头无果</p>
+<p>瞎弄的时候把 <code>app.pool.conf</code> 重命名成了 <code>aaa.pool.conf</code></p>
+<p>神奇的发现， php-fpm 正常了</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@8ddf4ad1d3b6:/usr/local/etc/php-fpm.d# php-fpm</div><div class="line"><span class="string">[05-Jul-2016 08:34:07]</span> NOTICE: fpm is running, pid <span class="number">188</span></div><div class="line"><span class="string">[05-Jul-2016 08:34:07]</span> NOTICE: ready to handle connections</div></pre></td></tr></table></figure>
+<p>然后测试了几个文件名，发现只要是 <code>app</code> 打头，都会造成 php-fpm 抽筋…目测是撞上了什么奇怪的规则</p>
+<p>然而我 Google 搜了好久都没发现有人报告这个问题…_(:3」∠)_</p>
+<p>嘛，自己记录一下吧.</p>
+
+            
+        </div>
+        <footer class="article-footer">
+            <!--<a data-url="http://lialosiu.com/2016/07/05/php-fpm配置的一个坑/" data-id="ciyn25i310004ygyzutb5bv4u"-->
+               <!--class="article-share-link">share</a>-->
+            
+        </footer>
+    </div>
+    
+</articl>
+
+
+
+        </div>
+        <div class="right-side-assistance">
+            
+            
+            
+            
+            <a href="http://www.lumpofsugar.co.jp/product/tayutama2_as/"><img src="http://www.lumpofsugar.co.jp/product/tayutama2_as/campaign/images/assistance/[150_600]004.jpg" alt="『タユタマ２-After Stories-』2017年4月28日発売予定！"></a>
+            
+            
+            
+            <a href="http://www.lumpofsugar.co.jp/product/tayutama2_as/"><img src="http://www.lumpofsugar.co.jp/product/tayutama2_as/campaign/images/assistance/[150_600]005.jpg" alt="『タユタマ２-After Stories-』2017年4月28日発売予定！"></a>
+            
+            
+            
+            <a href="http://www.favo.co.jp/"><img src="http://www.favo-soft.jp/soft/product/AstralAirFinale/banner/l_banner_A.jpg" alt="アストラエアの白き永遠 Finale -白き星の夢- 応援中！！"></a>
+            
+            
+            
+            <a href="http://www.favo.co.jp/"><img src="http://www.favo-soft.jp/soft/product/AstralAirFinale/banner/l_banner_B.jpg" alt="アストラエアの白き永遠 Finale -白き星の夢- 応援中！！"></a>
+            
+            
+        </div>
+    </div>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/momentjs/2.17.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/vue/2.1.10/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/semantic-ui/2.2.6/semantic.min.js"></script>
+<script src="/js/app.js"></script>
+</html>
