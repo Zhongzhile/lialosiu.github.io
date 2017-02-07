@@ -63,7 +63,7 @@
         
         <div class="article-entry">
             
-            <p>开发的时候发现，laravel-mongo 在 ORM 的时候，如果用 save 更新一个值，类型不同但值相同，是不会写入 db 的…</p>
+            <p>最近敲代码的时候发现，<a href="https://github.com/jenssegers/laravel-mongodb" target="_blank" rel="external">laravel-mongo</a> 在 ORM 的时候，如果用 save 更新一个值，类型不同但值相同，是不会写入 db 的…</p>
 <p>举个栗子:</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$data = <span class="keyword">new</span> Data();</div><div class="line">$data-&gt;_id = <span class="number">1</span>;</div><div class="line">$data-&gt;a = <span class="number">123</span>;</div><div class="line">$data-&gt;save();</div></pre></td></tr></table></figure>
 <p>那么mongo里面就是  <code>a: int32 = 123</code></p>
